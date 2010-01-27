@@ -1,0 +1,7 @@
+TODO
+====
+
+- Tests.
+- Add a template tag for fetching a user's searches.
+- Add aggregated views to see all activity (omitting user information).
+- Perhaps add an AJAX view that returns suggested searches?
