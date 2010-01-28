@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='saved_searches',
-    version='1.0.0-alpha',
+    version='1.0.0',
     description='Saves user searches for integration with Haystack.',
     author='Daniel Lindsley',
     author_email='daniel@toastdriven.com',
@@ -14,7 +14,7 @@ setup(
         'queued_search.templatetags',
     ],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',

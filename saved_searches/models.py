@@ -40,10 +40,10 @@ class SavedSearchManager(models.Manager):
 class SavedSearch(models.Model):
     search_key = models.SlugField(max_length=100, help_text="A way to arbitrarily group queries. Should be a single word. Example: all-products")
     user_query = models.CharField(max_length=1000, help_text="The text the user searched on. Useful for display.")
-    full_query = models.CharField(max_length=1000, help_text="The full query Haystack generated. Useful for searching again.")
-    result_count = models.PositiveIntegerField(default=0)
+    full_query = models.CharField(max_length=1000, default='', blank=True, help_text="The full query Haystack generated. Useful for searching again.")
+    result_count = models.PositiveIntegerField(default=0, blank=True)
     user = models.ForeignKey(User, blank=True, null=True, related_name='saved_searches')
-    created = models.DateTimeField(default=datetime.datetime.now)
+    created = models.DateTimeField(blank=True, default=datetime.datetime.now)
     
     objects = SavedSearchManager()
     

@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.template import Template, Context
 from django.test import TestCase
 from saved_searches.models import SavedSearch
 from notes.models import Note
@@ -137,3 +138,110 @@ class SavedSearchTestCase(TestCase):
         self.assertEqual([ss['user_query'] for ss in resp.context['page'].object_list], [u'test', u'everyone', u'test data'])
         self.assertEqual([ss['times_seen'] for ss in resp.context['page'].object_list], [4, 2, 1])
         self.assertEqual(resp.context['paginator'].num_pages, 1)
+
+
+class TemplateTagTestCase(TestCase):
+    def render(self, template_string, context={}):
+        t = Template(template_string)
+        c = Context(context)
+        return t.render(c)
+
+
+class MostRecentSearchesTestCase(TemplateTagTestCase):
+    def setUp(self):
+        super(MostRecentSearchesTestCase, self).setUp()
+        self.saved1 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='test'
+        )
+        self.saved2 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='everyone'
+        )
+        self.saved3 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='test data'
+        )
+        self.saved4 = SavedSearch.objects.create(
+            search_key='events',
+            user_query='test'
+        )
+        self.saved5 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='test'
+        )
+        self.saved6 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='everyone'
+        )
+    
+    def test_correct_usage(self):
+        temp = """{% load saved_searches_tags %}{% most_recent_searches as recent %}{% for search in recent %}'{{ search.user_query }}' {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'everyone' 'test' 'test' 'test data' 'everyone' 'test' ")
+        
+        temp = """{% load saved_searches_tags %}{% most_recent_searches as recent for_search_key "general" %}{% for search in recent %}'{{ search.user_query }}' {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'everyone' 'test' 'test data' 'everyone' 'test' ")
+        
+        temp = """{% load saved_searches_tags %}{% most_recent_searches as recent for_search_key "events" %}{% for search in recent %}'{{ search.user_query }}' {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'test' ")
+        
+        temp = """{% load saved_searches_tags %}{% most_recent_searches as recent limit 1 %}{% for search in recent %}'{{ search.user_query }}' {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'everyone' ")
+
+
+class MostPopularSearchesTestCase(TemplateTagTestCase):
+    def setUp(self):
+        super(MostPopularSearchesTestCase, self).setUp()
+        self.saved1 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='test'
+        )
+        self.saved2 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='everyone'
+        )
+        self.saved3 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='test data'
+        )
+        self.saved4 = SavedSearch.objects.create(
+            search_key='events',
+            user_query='test'
+        )
+        self.saved5 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='test'
+        )
+        self.saved6 = SavedSearch.objects.create(
+            search_key='general',
+            user_query='everyone'
+        )
+    
+    def test_correct_usage(self):
+        temp = """{% load saved_searches_tags %}{% most_popular_searches as popular %}{% for search in popular %}'{{ search.user_query }}' ({{ search.times_seen }}x) {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'test' (3x) 'everyone' (2x) 'test data' (1x) ")
+        
+        temp = """{% load saved_searches_tags %}{% most_popular_searches as popular for_search_key "general" %}{% for search in popular %}'{{ search.user_query }}' ({{ search.times_seen }}x) {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'everyone' (2x) 'test' (2x) 'test data' (1x) ")
+        
+        temp = """{% load saved_searches_tags %}{% most_popular_searches as popular for_search_key "events" %}{% for search in popular %}'{{ search.user_query }}' ({{ search.times_seen }}x) {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'test' (1x) ")
+        
+        temp = """{% load saved_searches_tags %}{% most_popular_searches as popular limit 1 %}{% for search in popular %}'{{ search.user_query }}' ({{ search.times_seen }}x) {% endfor %}"""
+        context = {}
+        output = self.render(temp, context)
+        self.assertEqual(output, u"'test' (3x) ")

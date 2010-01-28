@@ -6,5 +6,6 @@ TODO
 + Integration in SearchView.
 + Tests.
 + Add aggregated views to see all activity (omitting user information).
-- Add a template tag for fetching a user's searches.
++ Add a template tag for fetching a user's searches.
 - Perhaps add an AJAX view that returns suggested searches?
+- A management command for clearing out old data?
