@@ -10,4 +10,4 @@ class SavedSearchAdmin(admin.ModelAdmin):
     search_fields = ('user_query', 'search_key')
 
 
-site.register(SavedSearch, SavedSearchAdmin)
+admin.site.register(SavedSearch, SavedSearchAdmin)
