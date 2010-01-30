@@ -4,9 +4,17 @@ from django.db import models
 
 
 class SavedSearchManager(models.Manager):
-    def most_recent(self, user=None, search_key=None):
+    def most_recent(self, user=None, search_key=None, collapsed=True):
         """
         Returns the most recently seen queries.
+        
+        By default, only shows collapsed queries. This means that if the same
+        query was executed several times in a row, only the most recent is
+        shown and a count of ``times_seen`` is additionally provided.
+        
+        If you want to saw all queries (regardless of duplicates), pass
+        ``collapsed=False``. Note that the ``times_seen`` will always be 1 if
+        this behavior is used.
         
         Can filter by ``user`` and/or ``search_key`` if provided.
         """
@@ -18,7 +26,11 @@ class SavedSearchManager(models.Manager):
         if search_key is not None:
             qs = qs.filter(search_key=search_key)
         
-        return qs.values('user_query', 'created').order_by('-created')
+        if collapsed is True:
+            initial_list_qs = qs.values('user_query').order_by().annotate(times_seen=models.Count('user_query'))
+            return initial_list_qs.values('user_query', 'times_seen').annotate(most_recent=models.Max('created')).order_by('-most_recent')
+        else:
+            return qs.values('user_query', 'created').order_by('-created').annotate(times_seen=models.Count('user_query'))
     
     def most_popular(self, user=None, search_key=None):
         """
