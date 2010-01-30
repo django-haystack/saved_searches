@@ -1,6 +1,6 @@
-=============
+==============
 saved_searches
-=============
+==============
 
 Allows you to personalize search by storing a user's search history.
 
