@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='saved_searches',
-    version='1.0.2',
+    version='1.0.3',
     description='Saves user searches for integration with Haystack.',
     author='Daniel Lindsley',
     author_email='daniel@toastdriven.com',

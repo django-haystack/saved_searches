@@ -28,3 +28,5 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 HAYSTACK_SITECONF = 'notes.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'whoosh'
 HAYSTACK_WHOOSH_PATH = os.path.join(os.path.dirname(__file__), 'whoosh_index')
+# Set this low to simulate multiple pages.
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 1

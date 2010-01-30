@@ -51,22 +51,29 @@ class SavedSearchTestCase(TestCase):
         # Run a couple searches.
         resp = self.client.get('/search/', data={'q': 'test'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 2)
+        self.assertEqual(resp.context['paginator'].count, 2)
         self.assertEqual(SavedSearch.objects.all().count(), 1)
         
         resp = self.client.get('/search/', data={'q': 'everyone'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 1)
+        self.assertEqual(resp.context['paginator'].count, 1)
         self.assertEqual(SavedSearch.objects.all().count(), 2)
         
         resp = self.client.get('/search/', data={'q': 'test data'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 1)
+        self.assertEqual(resp.context['paginator'].count, 1)
         self.assertEqual(SavedSearch.objects.all().count(), 3)
         
         resp = self.client.get('/search/', data={'q': 'test'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 2)
+        self.assertEqual(resp.context['paginator'].count, 2)
+        self.assertEqual(SavedSearch.objects.all().count(), 4)
+        
+        # This shouldn't get logged.
+        resp = self.client.get('/search/', data={'q': 'test', 'page': 2})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context['paginator'].count, 2)
+        self.assertEqual(len(resp.context['page'].object_list), 1)
         self.assertEqual(SavedSearch.objects.all().count(), 4)
         
         # Run a couple user searches.
@@ -74,19 +81,19 @@ class SavedSearchTestCase(TestCase):
         
         resp = self.client.get('/search/', data={'q': 'test'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 2)
+        self.assertEqual(resp.context['paginator'].count, 2)
         self.assertEqual(SavedSearch.objects.all().count(), 5)
         self.assertEqual(SavedSearch.objects.filter(user=self.user1).count(), 1)
         
         resp = self.client.get('/search/', data={'q': 'everyone'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 1)
+        self.assertEqual(resp.context['paginator'].count, 1)
         self.assertEqual(SavedSearch.objects.all().count(), 6)
         self.assertEqual(SavedSearch.objects.filter(user=self.user1).count(), 2)
         
         resp = self.client.get('/search/', data={'q': 'test'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['page'].object_list), 2)
+        self.assertEqual(resp.context['paginator'].count, 2)
         self.assertEqual(SavedSearch.objects.all().count(), 7)
         self.assertEqual(SavedSearch.objects.filter(user=self.user1).count(), 3)
         

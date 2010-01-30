@@ -30,29 +30,39 @@ class SavedSearchView(SearchView):
         Saves the details of a user's search and then generates the actual
         HttpResponse to send back to the user.
         """
-        if not self.query:
-            return super(SavedSearchView, self).create_response()
+        (paginator, page) = self.build_page()
         
-        # Save the search.
-        saved_search = SavedSearch(
-            search_key=self.search_key,
-            user_query=self.query,
-            result_count=len(self.results)
-        )
-        
-        if hasattr(self.results, 'query'):
-            query_seen = self.results.query.build_query()
+        # Only save the search if we're on the first page.
+        # This will prevent an excessive number of duplicates for what is
+        # essentially the same search.
+        if self.query and page.number == 1:
+            # Save the search.
+            saved_search = SavedSearch(
+                search_key=self.search_key,
+                user_query=self.query,
+                result_count=len(self.results)
+            )
             
-            if isinstance(query_seen, basestring):
-                saved_search.full_query = query_seen
+            if hasattr(self.results, 'query'):
+                query_seen = self.results.query.build_query()
+            
+                if isinstance(query_seen, basestring):
+                    saved_search.full_query = query_seen
+            
+            if self.request.user.is_authenticated():
+                saved_search.user = self.request.user
+            
+            saved_search.save()
         
-        if self.request.user.is_authenticated():
-            saved_search.user = self.request.user
+        context = {
+            'query': self.query,
+            'form': self.form,
+            'page': page,
+            'paginator': paginator,
+        }
+        context.update(self.extra_context())
         
-        saved_search.save()
-        
-        # Now follow through with the rest of the processing.
-        return super(SavedSearchView, self).create_response()
+        return render_to_response(self.template, context, context_instance=self.context_class(self.request))
 
 
 def most_recent(request, username=None, search_key=None):
