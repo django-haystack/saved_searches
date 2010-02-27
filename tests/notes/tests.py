@@ -102,10 +102,12 @@ class SavedSearchTestCase(TestCase):
         # Verify the lists.
         self.assertEqual([ss['user_query'] for ss in SavedSearch.objects.most_recent()], [u'test', u'everyone', u'test data'])
         self.assertEqual([ss['times_seen'] for ss in SavedSearch.objects.most_recent()], [4, 2, 1])
+        self.assertEqual([ss['times_seen'] for ss in SavedSearch.objects.most_recent(threshold=2)], [4, 2])
         self.assertEqual([ss['user_query'] for ss in SavedSearch.objects.most_recent(collapsed=False)], [u'test', u'everyone', u'test', u'test', u'test data', u'everyone', u'test'])
         self.assertEqual([ss['times_seen'] for ss in SavedSearch.objects.most_recent(collapsed=False)], [1, 1, 1, 1, 1, 1, 1])
         self.assertEqual([ss['user_query'] for ss in SavedSearch.objects.most_popular()], [u'test', u'everyone', u'test data'])
         self.assertEqual([ss['times_seen'] for ss in SavedSearch.objects.most_popular()], [4, 2, 1])
+        self.assertEqual([ss['times_seen'] for ss in SavedSearch.objects.most_popular(threshold=2)], [4, 2])
         
         
         # Check to see if stats updated.

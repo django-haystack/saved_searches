@@ -10,6 +10,7 @@ from saved_searches.models import SavedSearch
 
 
 SAVED_SEARCHES_PER_PAGE = getattr(settings, 'SAVED_SEARCHES_PER_PAGE', 50)
+SAVED_SEARCHES_THRESHOLD = getattr(settings, 'SAVED_SEARCHES_THRESHOLD', 1)
 
 
 class SavedSearchView(SearchView):
@@ -89,7 +90,7 @@ def most_recent(request, username=None, search_key=None):
     else:
         user = None
     
-    most_recent = SavedSearch.objects.most_recent(user=user, search_key=search_key)
+    most_recent = SavedSearch.objects.most_recent(user=user, search_key=search_key, threshold=SAVED_SEARCHES_THRESHOLD)
     paginator = Paginator(most_recent, SAVED_SEARCHES_PER_PAGE)
     
     try:
@@ -129,7 +130,7 @@ def most_popular(request, username=None, search_key=None):
     else:
         user = None
     
-    most_recent = SavedSearch.objects.most_popular(user=user, search_key=search_key)
+    most_recent = SavedSearch.objects.most_popular(user=user, search_key=search_key, threshold=SAVED_SEARCHES_THRESHOLD)
     paginator = Paginator(most_recent, SAVED_SEARCHES_PER_PAGE)
     
     try:

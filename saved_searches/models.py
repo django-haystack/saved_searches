@@ -4,7 +4,7 @@ from django.db import models
 
 
 class SavedSearchManager(models.Manager):
-    def most_recent(self, user=None, search_key=None, collapsed=True):
+    def most_recent(self, user=None, search_key=None, collapsed=True, threshold=1):
         """
         Returns the most recently seen queries.
         
@@ -17,6 +17,9 @@ class SavedSearchManager(models.Manager):
         this behavior is used.
         
         Can filter by ``user`` and/or ``search_key`` if provided.
+        
+        Can provide a ``threshold`` (minimum number required to be included) as
+        an integer. Defaults to 1.
         """
         qs = self.get_query_set()
         
@@ -28,15 +31,18 @@ class SavedSearchManager(models.Manager):
         
         if collapsed is True:
             initial_list_qs = qs.values('user_query').order_by().annotate(times_seen=models.Count('user_query'))
-            return initial_list_qs.values('user_query', 'times_seen').annotate(most_recent=models.Max('created')).order_by('-most_recent')
+            return initial_list_qs.values('user_query', 'times_seen').annotate(most_recent=models.Max('created')).order_by('-most_recent').filter(times_seen__gte=threshold)
         else:
-            return qs.values('user_query', 'created').order_by('-created').annotate(times_seen=models.Count('user_query'))
+            return qs.values('user_query', 'created').order_by('-created').annotate(times_seen=models.Count('user_query')).filter(times_seen__gte=threshold)
     
-    def most_popular(self, user=None, search_key=None):
+    def most_popular(self, user=None, search_key=None, threshold=1):
         """
         Returns the most popular (frequently seen) queries.
         
         Can filter by ``user`` and/or ``search_key`` if provided.
+        
+        Can provide a ``threshold`` (minimum number required to be included) as
+        an integer. Defaults to 1.
         """
         qs = self.get_query_set()
         
@@ -46,7 +52,7 @@ class SavedSearchManager(models.Manager):
         if search_key is not None:
             qs = qs.filter(search_key=search_key)
         
-        return qs.values('user_query').order_by().annotate(times_seen=models.Count('user_query')).order_by('-times_seen')
+        return qs.values('user_query').order_by().annotate(times_seen=models.Count('user_query')).order_by('-times_seen').filter(times_seen__gte=threshold)
 
 
 class SavedSearch(models.Model):
@@ -58,6 +64,9 @@ class SavedSearch(models.Model):
     created = models.DateTimeField(blank=True, default=datetime.datetime.now)
     
     objects = SavedSearchManager()
+    
+    class Meta:
+        verbose_name_plural = 'Saved Searches'
     
     def __unicode__(self):
         if self.user:
