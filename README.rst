@@ -10,7 +10,7 @@ For use with Haystack (http://haystacksearch.org/).
 Requirements
 ============
 
-* Django 1.1+ (May work on 1.0.X but untested)
+* Django 1.2+
 * Haystack 1.X (http://github.com/toastdriven/django-haystack)
 
 
