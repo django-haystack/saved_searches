@@ -1,10 +1,9 @@
 from haystack import indexes
-from haystack import site
 from notes.models import Note
 
 
-class NoteIndex(indexes.RealTimeSearchIndex):
+class NoteIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, model_attr='content')
-
-
-site.register(Note, NoteIndex)
+    
+    def get_model(self):
+        return Note
